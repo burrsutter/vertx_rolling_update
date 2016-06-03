@@ -1,0 +1,8 @@
+{
+  "name": "vertxbusdemo",
+  "version": "1.0.0",
+  "description": "frontend to access vertx bus",
+  "dependencies": {
+    "vertx3-eventbus-client": "3.2.1"
+  }
+}

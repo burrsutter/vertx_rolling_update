@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>com.redhat.developers.vertxbus.consumer</groupId>
+  <artifactId>vertxbusconsumer</artifactId>
+  <version>1.0.0</version>
+  
+  <properties>
+    <vertx.version>3.2.1</vertx.version>
+    <main.verticle>com.redhat.developers.vertxbus.consumer.ServerVerticle</main.verticle>
+  </properties>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-dependencies</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
+  <dependencies>
+
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+    </dependency>    
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+
+  <plugins>
+    <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+           <source>1.8</source>
+           <target>1.8</target>
+        </configuration>
+    </plugin>
+    
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>2.3</version>
+      <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>shade</goal>
+            </goals>
+            <configuration>
+                <transformers>
+                  <transformer
+                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <manifestEntries>
+                      <Main-Class>io.vertx.core.Starter</Main-Class>
+                      <Main-Verticle>${main.verticle}</Main-Verticle>
+                    </manifestEntries>
+                  </transformer>
+                </transformers>
+                <artifactSet/>
+                <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
+            </configuration>
+          </execution>
+      </executions>
+    </plugin> 
+  </plugins>
+  </build>
+  
+  <profiles>
+		<profile>
+			<!-- When built in OpenShift the 'openshift' profile will be used when
+				invoking mvn. 
+        mvn package -Popenshift
+        removing cluster.xml under resources
+        which is useful for running a vert.x cluster on a Mac but 
+        not so much for when running on OpenShift 
+        https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html
+        -->
+			<id>openshift</id>
+			<build>
+				<plugins>
+					<plugin>
+
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>2.3</version>
+      <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+                <goal>shade</goal>
+            </goals>
+            <configuration>
+                <transformers>
+                  <transformer
+                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <manifestEntries>
+                      <Main-Class>io.vertx.core.Starter</Main-Class>
+                      <Main-Verticle>${main.verticle}</Main-Verticle>
+                    </manifestEntries>
+                  </transformer>
+                  <!-- do NOT include cluster.xml for OpenShift on CDK -->
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                    <resource>cluster.xml</resource>
+                  </transformer>                  
+                </transformers>
+                <artifactSet/>
+                <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
+            </configuration>
+          </execution>
+      </executions>
+          
+          </plugin>
+        </plugins>          
+      </build>          
+		</profile>
+	</profiles>
+  
+  
+</project>
+
