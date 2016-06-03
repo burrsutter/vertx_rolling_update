@@ -24,8 +24,6 @@ oc start-build consumer --from-dir=. --follow
 
 oc new-app consumer -l app=consumer
 
-oc delete service consumer
-oc expose dc consumer --port=8080
 oc expose service consumer
 
 
